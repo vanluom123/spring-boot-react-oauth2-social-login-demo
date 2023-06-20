@@ -2,10 +2,10 @@ package com.example.springsocial.security.oauth2.user;
 
 import java.util.Map;
 
-public abstract class OAuth2UserInfo {
+public abstract class AbstractOAuth2User {
     protected Map<String, Object> attributes;
 
-    public OAuth2UserInfo(Map<String, Object> attributes) {
+    public AbstractOAuth2User(Map<String, Object> attributes) {
         this.attributes = attributes;
     }
 

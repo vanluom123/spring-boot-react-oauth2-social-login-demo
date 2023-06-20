@@ -5,8 +5,8 @@ import com.example.springsocial.model.AuthProvider;
 import com.example.springsocial.model.User;
 import com.example.springsocial.repository.UserRepository;
 import com.example.springsocial.security.UserPrincipal;
-import com.example.springsocial.security.oauth2.user.OAuth2UserInfo;
-import com.example.springsocial.security.oauth2.user.OAuth2UserInfoFactory;
+import com.example.springsocial.security.oauth2.user.AbstractOAuth2User;
+import com.example.springsocial.security.oauth2.user.OAuth2UserFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;
@@ -44,12 +44,12 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     }
 
     private OAuth2User processOAuth2User(OAuth2UserRequest oAuth2UserRequest, OAuth2User oAuth2User) {
-        OAuth2UserInfo oAuth2UserInfo = OAuth2UserInfoFactory.getOAuth2UserInfo(oAuth2UserRequest.getClientRegistration().getRegistrationId(), oAuth2User.getAttributes());
-        if (StringUtils.isEmpty(oAuth2UserInfo.getEmail())) {
+        AbstractOAuth2User abstractOAuth2User = OAuth2UserFactory.getOAuth2UserInfo(oAuth2UserRequest.getClientRegistration().getRegistrationId(), oAuth2User.getAttributes());
+        if (!StringUtils.hasLength(abstractOAuth2User.getEmail())) {
             throw new OAuth2AuthenticationProcessingException("Email not found from OAuth2 provider");
         }
 
-        Optional<User> userOptional = userRepository.findByEmail(oAuth2UserInfo.getEmail());
+        Optional<User> userOptional = userRepository.findByEmail(abstractOAuth2User.getEmail());
         User user;
         if (userOptional.isPresent()) {
             user = userOptional.get();
@@ -58,28 +58,28 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                         user.getProvider() + " account. Please use your " + user.getProvider() +
                         " account to login.");
             }
-            user = updateExistingUser(user, oAuth2UserInfo);
+            user = updateExistingUser(user, abstractOAuth2User);
         } else {
-            user = registerNewUser(oAuth2UserRequest, oAuth2UserInfo);
+            user = registerNewUser(oAuth2UserRequest, abstractOAuth2User);
         }
 
         return UserPrincipal.create(user, oAuth2User.getAttributes());
     }
 
-    private User registerNewUser(OAuth2UserRequest oAuth2UserRequest, OAuth2UserInfo oAuth2UserInfo) {
+    private User registerNewUser(OAuth2UserRequest oAuth2UserRequest, AbstractOAuth2User abstractOAuth2User) {
         User user = new User();
 
         user.setProvider(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()));
-        user.setProviderId(oAuth2UserInfo.getId());
-        user.setName(oAuth2UserInfo.getName());
-        user.setEmail(oAuth2UserInfo.getEmail());
-        user.setImageUrl(oAuth2UserInfo.getImageUrl());
+        user.setProviderId(abstractOAuth2User.getId());
+        user.setName(abstractOAuth2User.getName());
+        user.setEmail(abstractOAuth2User.getEmail());
+        user.setImageUrl(abstractOAuth2User.getImageUrl());
         return userRepository.save(user);
     }
 
-    private User updateExistingUser(User existingUser, OAuth2UserInfo oAuth2UserInfo) {
-        existingUser.setName(oAuth2UserInfo.getName());
-        existingUser.setImageUrl(oAuth2UserInfo.getImageUrl());
+    private User updateExistingUser(User existingUser, AbstractOAuth2User abstractOAuth2User) {
+        existingUser.setName(abstractOAuth2User.getName());
+        existingUser.setImageUrl(abstractOAuth2User.getImageUrl());
         return userRepository.save(existingUser);
     }
 

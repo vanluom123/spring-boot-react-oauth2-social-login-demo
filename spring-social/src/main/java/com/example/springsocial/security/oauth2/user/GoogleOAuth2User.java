@@ -2,9 +2,9 @@ package com.example.springsocial.security.oauth2.user;
 
 import java.util.Map;
 
-public class GoogleOAuth2UserInfo extends OAuth2UserInfo {
+public class GoogleOAuth2User extends AbstractOAuth2User {
 
-    public GoogleOAuth2UserInfo(Map<String, Object> attributes) {
+    public GoogleOAuth2User(Map<String, Object> attributes) {
         super(attributes);
     }
 
