@@ -9,6 +9,18 @@ import java.util.List;
 public class AppProperties {
   private final Auth auth = new Auth();
   private final OAuth2 oauth2 = new OAuth2();
+  private final Cors cors = new Cors();
+
+  public static class Cors {
+    private String[] allowedOrigins;
+    public String[] getAllowedOrigins() {
+      return allowedOrigins;
+    }
+
+    public void setAllowedOrigins(String[] allowedOrigins) {
+      this.allowedOrigins = allowedOrigins;
+    }
+  }
 
   public static class Auth {
     private String tokenSecret;
@@ -50,5 +62,9 @@ public class AppProperties {
 
   public OAuth2 getOauth2() {
     return oauth2;
+  }
+
+  public Cors getCors() {
+    return cors;
   }
 }
